@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Anthony Marshall Prugel | Premium Content Production</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Manrope:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+      /* CSS Reset & Base */
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0d0d0d;
+        color: #ffffff;
+        line-height: 1.5;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Apple-style Glass Navbar */
+      .glass-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 48px;
+        z-index: 100;
+        /* Blur properties moved to ::before pseudo-element to prevent 
+           stacking context trapping. This allows the dropdown to properly 
+           blur the document root behind it. */
+      }
+
+      .glass-nav::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-color: rgba(20, 20, 20, 0.4);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        backdrop-filter: blur(16px) saturate(180%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      /* Dropdown Trigger & Container */
+      .nav-brand-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .nav-brand {
+        font-family: 'Manrope', sans-serif;
+        font-size: 24px;
+        font-weight: 400;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        padding: 8px 12px;
+        margin-left: -12px;
+        border-radius: 8px;
+        transition: opacity 0.2s ease;
+      }
+
+      .nav-brand:hover, .nav-brand:focus-visible {
+        opacity: 0.6;
+        outline: none;
+      }
+
+      .chevron {
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        will-change: transform;
+      }
+
+      /* Glass Dropdown Menu (Container) */
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 12px);
+        left: -12px;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        
+        /* Critical Fix: Explicit z-index ensures blur computes against hero content */
+        z-index: 999;
+        
+        /* Ported entirely from index.html mobile navbar */
+        background-color: rgba(16, 14, 10, 0.7);
+        -webkit-backdrop-filter: blur(15px);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        
+        /* Animation Base */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px) scale(0.96);
+        transform-origin: top left;
+        transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s;
+        pointer-events: none;
+      }
+
+      .dropdown-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+
+      .dropdown-item {
+        font-family: 'Manrope', sans-serif;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 20px;
+        
+        /* Layout rhythm preservation: 
+           Original was 10px padding + 4px gap (14px).
+           New is 12px padding + 0px gap + 1px border.
+           This precisely centers the divider line while maintaining the exact same vertical real estate. */
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        
+        transform-origin: left center;
+        background-color: transparent;
+        
+        /* Hover state physics ported from index.html */
+        transition: transform 0.2s ease-out, filter 0.2s ease-out, opacity 0.2s ease;
+        
+        /* Staggered Initial State */
+        opacity: 0;
+        transform: translateY(-10px) scale(1);
+      }
+
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+
+      /* Staggered Active State */
+      .dropdown-menu.active .dropdown-item {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      /* Hover Interaction for Dropdown Items */
+      .dropdown-menu.active .dropdown-item:hover, 
+      .dropdown-menu.active .dropdown-item:focus-visible {
+        opacity: 0.8;
+        transform: translateY(0) scale(1.05);
+        outline: none;
+      }
+
+      /* Active press state scaling ported from index.html */
+      .dropdown-menu.active .dropdown-item:active {
+        transform: translateY(0) scale(1.1);
+      }
+
+      .dropdown-menu.active .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
+      .dropdown-menu.active .dropdown-item:nth-child(2) { transition-delay: 0.10s; }
+      .dropdown-menu.active .dropdown-item:nth-child(3) { transition-delay: 0.15s; }
+      .dropdown-menu.active .dropdown-item:nth-child(4) { transition-delay: 0.20s; }
+      .dropdown-menu.active .dropdown-item:nth-child(5) { transition-delay: 0.25s; }
+      .dropdown-menu.active .dropdown-item:nth-child(6) { transition-delay: 0.30s; }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+
+      .nav-link {
+        font-family: 'Manrope', sans-serif;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 22px;
+        font-weight: 400;
+        transition: opacity 0.2s ease;
+      }
+      
+      .nav-link:hover { opacity: 0.6; }
+
+      /* Extracted Button Animations & Glass Style */
+      .btn-glass, .btn-contact-float {
+        text-decoration: none;
+        cursor: pointer;
+        
+        /* Animation physics extracted from Source 2 */
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease, border-color 0.2s ease !important;
+        will-change: transform;
+      }
+
+      .btn-glass:hover {
+        transform: scale(1.05) !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      
+      .btn-contact-float:hover {
+        transform: scale(1.05) !important;
+      }
+
+      .btn-glass:active, .btn-contact-float:active {
+        transform: scale(0.98) !important;
+      }
+
+      .btn-glass {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 400;
+        background-color: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        color: #ffffff;
+        padding: 2px 16px;
+        border-radius: 50px;
+        font-size: 24px;
+      }
+
+      .btn-contact-float {
+        position: absolute;
+        bottom: 20%;
+        right: 15%;
+        z-index: 3;
+        font-weight: 500;
+        background-color: rgba(20, 20, 20, 0.4);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        padding: 16px 40px;
+        border-radius: 50px;
+        font-size: 24px;
+        pointer-events: auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Hero Section Layout */
+      .hero-container {
+        display: flex;
+        min-height: 100vh;
+        padding: 60px 48px 0;
+        position: relative;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .hero-content {
+        flex: 1;
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        z-index: 2;
+      }
+
+      .hero-title {
+        font-size: clamp(64px, 8vw, 110px);
+        font-weight: 800;
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+        margin-bottom: 48px;
+      }
+
+      .hero-subtitle {
+        font-size: 18px;
+        color: #b0b0b0;
+        margin-bottom: 32px;
+        max-width: 420px;
+      }
+
+      .hero-image-wrapper {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 65%;
+        height: 90vh;
+        z-index: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        pointer-events: none;
+      }
+
+      .hero-image-wrapper img {
+        height: 100%;
+        width: auto;
+        object-fit: contain;
+        object-position: bottom right;
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 1024px) {
+        .hero-title { font-size: 72px; }
+        .hero-image-wrapper { width: 55%; }
+        .btn-contact-float { right: 10%; bottom: 15%; }
+      }
+
+      @media (max-width: 768px) {
+        .glass-nav { padding: 0 24px; }
+        .nav-links { display: none; }
+
+        .hero-container {
+          flex-direction: column;
+          padding: 60px 24px 0;
+        }
+        
+        .hero-content {
+          text-align: left;
+          max-width: 100%;
+        }
+
+        .hero-image-wrapper {
+          position: relative;
+          width: 100%;
+          height: 50vh;
+          justify-content: center;
+        }
+
+        .btn-contact-float {
+          position: relative;
+          bottom: auto;
+          right: auto;
+          margin-top: -40px;
+          align-self: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    
+    <nav class="glass-nav">
+      <div class="nav-brand-container">
+        <div class="nav-brand" id="brand-dropdown-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+          Anthony Marshall Prugel 
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </div>
+        
+        <div class="dropdown-menu" id="brand-dropdown" role="menu">
+          <a href="#contact" class="dropdown-item" role="menuitem">Contact</a>
+          <a href="#studio" class="dropdown-item" role="menuitem">Studio</a>
+          <a href="#equipment" class="dropdown-item" role="menuitem">Equipment</a>
+          <a href="#productions" class="dropdown-item" role="menuitem">Productions</a>
+          <a href="#hiring" class="dropdown-item" role="menuitem">Hiring</a>
+          <a href="#start-podcast" class="dropdown-item" role="menuitem">Start a Podcast</a>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a href="#work" class="nav-link">Work</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#book" class="btn-glass">Book a Call</a>
+      </div>
+    </nav>
+
+    <main class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">Anthony<br>Marshall<br>Prugel</h1>
+        <p class="hero-subtitle">Premium Podcast & Video Production for Founders, Brands & Modern Media Personalities</p>
+        <p class="hero-subtitle">We create cinematic long-form and short-form content systems designed to position brands as category authorities.</p>
+      </div>
+      
+      <div class="hero-image-wrapper">
+        <img src="E:\Web Projects\tony\assets\anthony-marshall-prugel-podcast-producer-portrait.png" alt="Anthony Marshall Prugel Portrait" />
+        <button class="btn-contact-float">CONTACT ME</button>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const trigger = document.getElementById('brand-dropdown-trigger');
+        const dropdown = document.getElementById('brand-dropdown');
+        const chevron = trigger.querySelector('.chevron');
+        const menuItems = dropdown.querySelectorAll('.dropdown-item');
+
+        const toggleDropdown = () => {
+          const isActive = dropdown.classList.contains('active');
+          if (isActive) {
+            closeDropdown();
+          } else {
+            openDropdown();
+          }
+        };
+
+        const openDropdown = () => {
+          dropdown.classList.add('active');
+          trigger.setAttribute('aria-expanded', 'true');
+          chevron.style.transform = 'rotate(180deg)';
+        };
+
+        const closeDropdown = () => {
+          dropdown.classList.remove('active');
+          trigger.setAttribute('aria-expanded', 'false');
+          chevron.style.transform = 'rotate(0deg)';
+        };
+
+        // Mouse Click Toggle
+        trigger.addEventListener('click', toggleDropdown);
+
+        // Keyboard Access: Enter/Space to open
+        trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleDropdown();
+            if (!dropdown.classList.contains('active')) {
+              menuItems[0]?.focus();
+            }
+          }
+        });
+
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+          if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+            closeDropdown();
+          }
+        });
+
+        // Escape to close
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && dropdown.classList.contains('active')) {
+            closeDropdown();
+            trigger.focus();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
